@@ -49,20 +49,20 @@ function useReveals() {
 }
 
 function BirthdayPage() {
-  const [now, setNow] = useState(() => Date.now());
-  const [stage, setStage] = useState<"countdown" | "transition" | "birthday">(() => Date.now() >= TARGET ? "transition" : "countdown");
+  const [now, setNow] = useState<number | null>(null);
+  const [stage, setStage] = useState<"countdown" | "transition" | "birthday">("countdown");
   useReveals();
-  useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
-  useEffect(() => { if (stage === "countdown" && now >= TARGET) setStage("transition"); }, [now, stage]);
+  useEffect(() => { setNow(Date.now()); const timer = window.setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
+  useEffect(() => { if (stage === "countdown" && now !== null && now >= TARGET) setStage("transition"); }, [now, stage]);
   useEffect(() => { if (stage !== "transition") return; const timer = window.setTimeout(() => setStage("birthday"), 4600); return () => clearTimeout(timer); }, [stage]);
   if (stage === "countdown") return <Countdown now={now} />;
   if (stage === "transition") return <MidnightReveal />;
   return <BirthdayWorld />;
 }
 
-function Countdown({ now }: { now: number }) {
-  const total = Math.max(0, TARGET - now);
-  const units = [Math.floor(total / 86400000), Math.floor(total / 3600000) % 24, Math.floor(total / 60000) % 60, Math.floor(total / 1000) % 60];
+function Countdown({ now }: { now: number | null }) {
+  const total = now === null ? null : Math.max(0, TARGET - now);
+  const units = total === null ? [null, null, null, null] : [Math.floor(total / 86400000), Math.floor(total / 3600000) % 24, Math.floor(total / 60000) % 60, Math.floor(total / 1000) % 60];
   return <main className="film-grain relative grid min-h-[100svh] place-items-center overflow-hidden bg-background px-5 text-center">
     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,var(--rose-glow),transparent_38%)]" /><Particles />
     <section className="cinematic-enter relative z-10 mx-auto w-full max-w-4xl">
@@ -71,7 +71,7 @@ function Countdown({ now }: { now: number }) {
       <h1 className="font-display text-4xl leading-tight sm:text-6xl md:text-7xl">Something special is<br className="hidden sm:block" /> waiting for you…</h1>
       <p className="mt-6 text-base font-light text-muted-foreground sm:text-lg">Come back when the clock strikes 12.</p>
       <div className="mx-auto my-12 grid max-w-2xl grid-cols-4 gap-2 sm:gap-5" aria-label="Countdown to September 13, 2026 at midnight India time">
-        {units.map((unit, i) => <div key={i} className="border-y border-border bg-card/30 py-5 backdrop-blur-sm sm:py-7"><span className="block font-display text-3xl tabular-nums sm:text-5xl">{String(unit).padStart(2,"0")}</span><span className="mt-2 block text-[9px] uppercase tracking-[.22em] text-muted-foreground sm:text-[10px]">{["Days","Hours","Minutes","Seconds"][i]}</span></div>)}
+        {units.map((unit, i) => <div key={i} className="border-y border-border bg-card/30 py-5 backdrop-blur-sm sm:py-7"><span className="block font-display text-3xl tabular-nums sm:text-5xl">{unit === null ? "––" : String(unit).padStart(2,"0")}</span><span className="mt-2 block text-[9px] uppercase tracking-[.22em] text-muted-foreground sm:text-[10px]">{["Days","Hours","Minutes","Seconds"][i]}</span></div>)}
       </div>
       <p className="text-xs uppercase tracking-[.28em] text-gold">Until her special day</p>
       <p className="mt-12 font-display text-base italic text-muted-foreground">The wait will be worth it.</p>
