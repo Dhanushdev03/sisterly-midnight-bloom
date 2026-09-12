@@ -168,9 +168,8 @@
 @utility film-grain {
   &::after { content:""; position:fixed; inset:0; z-index:50; pointer-events:none; opacity:.045; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E"); }
 }
-@utility cinematic-glow { box-shadow: 0 24px 90px -35px var(--rose-glow), 0 0 0 1px color-mix(in oklab, var(--gold) 20%, transparent); }
-@utility reveal { opacity:0; transform:translateY(32px); filter:blur(8px); transition:opacity .9s ease, transform .9s ease, filter .9s ease; }
-@utility is-visible { opacity:1; transform:none; filter:blur(0); }
+@utility reveal { opacity:1; transform:none; filter:none; }
+@utility is-visible { opacity:1; transform:none; filter:none; }
 @utility soft-mask { mask-image:linear-gradient(to bottom,transparent 0%,black 12%,black 85%,transparent 100%); }
 
 .particle { position:absolute; width:3px; height:3px; border-radius:999px; background:var(--gold); box-shadow:0 0 12px var(--gold); animation:drift 6s ease-in-out infinite; }
@@ -179,10 +178,8 @@
 .particle:nth-child(5n) { animation-duration:10s; }
 .particle:nth-child(1){left:6%;top:15%}.particle:nth-child(2){left:14%;top:72%}.particle:nth-child(3){left:22%;top:36%}.particle:nth-child(4){left:31%;top:83%}.particle:nth-child(5){left:39%;top:19%}.particle:nth-child(6){left:47%;top:65%}.particle:nth-child(7){left:56%;top:30%}.particle:nth-child(8){left:64%;top:78%}.particle:nth-child(9){left:72%;top:14%}.particle:nth-child(10){left:81%;top:54%}.particle:nth-child(11){left:90%;top:25%}.particle:nth-child(12){left:95%;top:82%}.particle:nth-child(13){left:11%;top:48%}.particle:nth-child(14){left:27%;top:9%}.particle:nth-child(15){left:44%;top:91%}.particle:nth-child(16){left:59%;top:8%}.particle:nth-child(17){left:75%;top:42%}.particle:nth-child(18){left:87%;top:91%}
 .cinematic-enter { animation:cinematic-in 1.4s cubic-bezier(.2,.8,.2,1) both; }
-.photo-float { animation:photo-float 7s ease-in-out infinite; }
-.letter-lines p { opacity:.2; transform:translateY(8px); transition:opacity .7s ease,transform .7s ease; }
+.letter-lines p { opacity:.95; transform:none; }
 .letter-lines.is-visible p { opacity:1; transform:none; }
-.letter-lines p:nth-child(2){transition-delay:.12s}.letter-lines p:nth-child(3){transition-delay:.24s}.letter-lines p:nth-child(4){transition-delay:.36s}.letter-lines p:nth-child(5){transition-delay:.48s}.letter-lines p:nth-child(6){transition-delay:.6s}.letter-lines p:nth-child(7){transition-delay:.72s}.letter-lines p:nth-child(8){transition-delay:.84s}.letter-lines p:nth-child(9){transition-delay:.96s}
 
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; }

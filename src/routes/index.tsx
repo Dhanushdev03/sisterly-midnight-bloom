@@ -124,6 +124,21 @@ function BirthdayExperience() {
     }
   }, [now, stage]);
 
+  // Smooth auto-unlock audio on first touch or click
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (!hasStartedAudio && heroAudioRef.current) {
+        playHeroSongOnce();
+      }
+    };
+    window.addEventListener("click", handleFirstInteraction, { once: true });
+    window.addEventListener("touchstart", handleFirstInteraction, { once: true });
+    return () => {
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("touchstart", handleFirstInteraction);
+    };
+  }, [hasStartedAudio]);
+
   const triggerMidnightReveal = () => {
     setStage("transition");
     playHeroSongOnce();
@@ -405,7 +420,7 @@ function SectionHeading({
   icon?: typeof Sparkles;
 }) {
   return (
-    <header className="reveal mb-14 max-w-3xl">
+    <header className="mb-14 max-w-3xl">
       <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3.5 py-1 text-[11px] font-medium uppercase tracking-[.32em] text-gold backdrop-blur-md">
         <Icon className="size-3.5" />
         <span>{eyebrow}</span>
@@ -474,7 +489,11 @@ function BirthdayWorld({
         onSwitchTrack={onSwitchTrack}
       />
 
-      <Hero onScrollDown={onScrollToChildhood} />
+      <Hero
+        onScrollDown={onScrollToChildhood}
+        isPlaying={isPlaying}
+        onTogglePlay={onTogglePlay}
+      />
       <QuickNav />
       <ChildhoodSection onOpen={(idx) => openLightbox(childhoodPhotos, idx)} />
       <PrimeSection onOpen={(idx) => openLightbox(primePhotos, idx)} />
@@ -487,7 +506,7 @@ function BirthdayWorld({
       {/* Surprise trigger section */}
       <section className="relative overflow-hidden py-32 text-center">
         <Particles />
-        <div className="reveal relative z-10 mx-auto max-w-xl px-6">
+        <div className="relative z-10 mx-auto max-w-xl px-6">
           <Sparkles className="mx-auto mb-6 size-6 text-gold animate-pulse" />
           <h2 className="font-display text-4xl sm:text-6xl">Still not done.</h2>
           <p className="mt-5 text-muted-foreground sm:text-lg">
@@ -541,7 +560,11 @@ function DualTrackAudioBar({
   onSwitchTrack: (track: "hero" | "sibling") => void;
 }) {
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full border border-border/80 bg-background/90 p-2 shadow-2xl backdrop-blur-xl">
+    <div
+      className={`fixed bottom-4 right-4 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border border-border/80 bg-background/95 p-2 shadow-2xl backdrop-blur-xl transition-all ${
+        !isPlaying ? "ring-2 ring-gold/70 shadow-gold/20 animate-pulse" : ""
+      }`}
+    >
       {/* Current Track Pill */}
       <div className="hidden sm:flex items-center gap-2 px-3 text-xs">
         <span className="size-2 rounded-full bg-primary animate-ping" />
@@ -617,7 +640,15 @@ function QuickNav() {
   );
 }
 
-function Hero({ onScrollDown }: { onScrollDown: () => void }) {
+function Hero({
+  onScrollDown,
+  isPlaying,
+  onTogglePlay,
+}: {
+  onScrollDown: () => void;
+  isPlaying: boolean;
+  onTogglePlay: () => void;
+}) {
   return (
     <section id="hero" className="relative min-h-[100svh] overflow-hidden">
       <img
@@ -664,6 +695,22 @@ function Hero({ onScrollDown }: { onScrollDown: () => void }) {
             <Button asChild variant="glass" size="lg" className="text-sm">
               <a href="#treat">Pay Treat Tax 🍕</a>
             </Button>
+            <Button
+              variant="glass"
+              size="lg"
+              className="text-sm border-gold/40 text-gold hover:border-gold hover:bg-gold/20"
+              onClick={onTogglePlay}
+            >
+              {isPlaying ? (
+                <>
+                  <Pause className="mr-1.5 size-4" /> Pause Music
+                </>
+              ) : (
+                <>
+                  <Music className="mr-1.5 size-4 animate-bounce" /> 🎵 Play Birthday Song
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>
@@ -686,7 +733,7 @@ function ChildhoodSection({ onOpen }: { onOpen: (i: number) => void }) {
         {childhoodPhotos.map((photo, i) => (
           <article
             key={photo.id}
-            className="reveal group relative flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-xl backdrop-blur-md transition-all duration-500 hover:-translate-y-2 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10"
+            className="group relative flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-xl backdrop-blur-md transition-all duration-500 hover:-translate-y-2 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10"
           >
             <div
               className="relative aspect-[4/3] w-full cursor-zoom-in overflow-hidden bg-muted"
@@ -766,7 +813,7 @@ function PrimeSection({ onOpen }: { onOpen: (i: number) => void }) {
             <figure
               key={photo.id}
               onClick={() => onOpen(i)}
-              className="reveal group relative mb-4 block cursor-zoom-in break-inside-avoid overflow-hidden rounded-lg border border-border/60 bg-card shadow-lg transition duration-500 hover:-translate-y-1.5 hover:border-primary/60 hover:shadow-2xl"
+              className="group relative mb-4 block cursor-zoom-in break-inside-avoid overflow-hidden rounded-lg border border-border/60 bg-card shadow-lg transition duration-500 hover:-translate-y-1.5 hover:border-primary/60 hover:shadow-2xl"
             >
               <img
                 src={photo.src}
@@ -819,7 +866,7 @@ function RecentSection({ onOpen }: { onOpen: (i: number) => void }) {
           <button
             key={photo.id}
             onClick={() => onOpen(i)}
-            className="reveal group relative mb-5 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-xl border border-border/60 bg-card text-left shadow-2xl transition duration-500 hover:-translate-y-1.5 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="group relative mb-5 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-xl border border-border/60 bg-card text-left shadow-2xl transition duration-500 hover:-translate-y-1.5 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <img
               src={photo.src}
@@ -888,7 +935,7 @@ function Story({ onOpenStoryPhoto }: { onOpenStoryPhoto: (photo: PhotoItem) => v
           {entries.map(([title, copy, photo], i) => (
             <article
               key={title}
-              className="reveal relative grid gap-7 py-12 pl-8 sm:grid-cols-2 sm:items-center sm:gap-16 sm:pl-16"
+              className="relative grid gap-7 py-12 pl-8 sm:grid-cols-2 sm:items-center sm:gap-16 sm:pl-16"
             >
               <span className="absolute -left-[5px] top-16 size-2.5 rounded-full bg-gold shadow-[0_0_18px_var(--gold)]" />
               <div className={i % 2 ? "sm:order-2" : ""}>
@@ -1174,7 +1221,7 @@ function Polaroids({ onOpen }: { onOpen: (photo: PhotoItem) => void }) {
             <figure
               key={photo.id}
               onClick={() => onOpen(photo)}
-              className={`reveal group cursor-zoom-in bg-foreground p-2 pb-9 shadow-2xl transition duration-500 hover:z-10 hover:rotate-0 hover:-translate-y-4 hover:scale-105 sm:p-3 sm:pb-12 ${
+              className={`group cursor-zoom-in bg-foreground p-2 pb-9 shadow-2xl transition duration-500 hover:z-10 hover:rotate-0 hover:-translate-y-4 hover:scale-105 sm:p-3 sm:pb-12 ${
                 ["-rotate-3", "rotate-2", "-rotate-1", "rotate-3", "-rotate-2"][i]
               }`}
             >
@@ -1206,7 +1253,7 @@ function Finale() {
         className="absolute inset-0 h-full w-full object-cover object-center opacity-40"
       />
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,var(--background),transparent_35%,var(--ink)_95%)]" />
-      <div className="reveal relative z-10 max-w-4xl px-6">
+      <div className="relative z-10 max-w-4xl px-6">
         <p className="font-display text-2xl leading-relaxed sm:text-4xl">
           Some people enter your life.
         </p>
